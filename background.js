@@ -222,7 +222,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
 
       case 'GET_RANKINGS': {
         const today = new Date().toISOString().slice(0, 10);
-        const resp  = await fetch(`http://api.clubelo.com/${today}`);
+        const resp  = await fetch(`https://api.clubelo.com/${today}`);
         if (!resp.ok) throw new Error(`Club Elo ${resp.status}`);
         const csv  = await resp.text();
         const rows = csv.trim().split('\n').slice(1).map(line => {

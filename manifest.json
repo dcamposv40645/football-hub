@@ -7,7 +7,7 @@
   "host_permissions": [
     "https://site.api.espn.com/*",
     "https://a.espncdn.com/*",
-    "http://api.clubelo.com/*"
+    "https://api.clubelo.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -24,7 +24,7 @@
   "web_accessible_resources": [
     {
       "resources": ["icons/*.png"],
-      "matches": ["<all_urls>"]
+      "matches": ["chrome-extension://*/*"]
     }
   ]
 }

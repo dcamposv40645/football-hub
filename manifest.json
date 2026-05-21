@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Football Hub",
+  "version": "1.0.0",
+  "description": "Next match countdown, results, squad stats, standings and rankings for your club.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://site.api.espn.com/*",
+    "https://a.espncdn.com/*",
+    "http://api.clubelo.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Football Hub",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

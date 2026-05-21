@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Football Hub</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <img id="header-crest" src="" alt="" class="logo">
+    <div class="header-text">
+      <div id="header-name" class="club-name"></div>
+      <div id="header-league" class="club-season"></div>
+    </div>
+    <button id="news-btn" class="news-btn" title="Team news">News</button>
+    <button id="change-team-btn" class="change-team-btn" title="Change team">&#9776;</button>
+  </header>
+
+  <!-- Tab bar -->
+  <nav class="tab-bar">
+    <button class="tab active" data-tab="match">Match</button>
+    <button class="tab"        data-tab="results">Results</button>
+    <button class="tab"        data-tab="squad">Squad</button>
+    <button class="tab"        data-tab="table">Table</button>
+    <button class="tab"        data-tab="rankings">Rankings</button>
+  </nav>
+
+  <!-- Panes -->
+  <main class="content">
+
+    <!-- ── MATCH ── -->
+    <section id="pane-match" class="pane active">
+      <div id="match-loading" class="center-state"><div class="spinner"></div></div>
+
+      <div id="match-card" class="match-card" style="display:none">
+        <div class="vs-row">
+          <div class="vs-team">
+            <img id="m-home-crest" class="vs-crest" alt="">
+            <span id="m-home-name" class="vs-name"></span>
+          </div>
+          <div class="vs-mid">VS</div>
+          <div class="vs-team">
+            <img id="m-away-crest" class="vs-crest" alt="">
+            <span id="m-away-name" class="vs-name"></span>
+          </div>
+        </div>
+
+        <div class="match-meta">
+          <div id="m-comp" class="meta-comp"></div>
+          <div id="m-date" class="meta-date"></div>
+        </div>
+
+        <div class="countdown-box">
+          <div class="cd-title">Kick-off in</div>
+          <div class="cd-row">
+            <div class="cd-unit"><span class="cd-num" id="cd-d">--</span><span class="cd-lbl">d</span></div>
+            <span class="cd-sep">:</span>
+            <div class="cd-unit"><span class="cd-num" id="cd-h">--</span><span class="cd-lbl">h</span></div>
+            <span class="cd-sep">:</span>
+            <div class="cd-unit"><span class="cd-num" id="cd-m">--</span><span class="cd-lbl">m</span></div>
+            <span class="cd-sep">:</span>
+            <div class="cd-unit"><span class="cd-num" id="cd-s">--</span><span class="cd-lbl">s</span></div>
+          </div>
+        </div>
+
+        <div id="live-box" style="display:none">
+          <span class="live-pill">● LIVE</span>
+          <span id="live-clock" class="live-clock-txt"></span>
+        </div>
+      </div>
+
+      <div id="live-events" style="display:none"></div>
+
+      <div id="prematch" style="display:none"></div>
+
+      <div id="match-offseason" class="center-state" style="display:none">
+        <div style="font-size:28px">🏖️</div>
+        <p id="match-offseason-msg" style="font-size:13px;font-weight:600;color:var(--white)"></p>
+        <p style="font-size:11px;color:var(--muted)">No upcoming fixtures scheduled yet</p>
+      </div>
+
+      <div id="match-error" class="center-state err" style="display:none">
+        <p id="match-err-msg"></p>
+        <button data-retry="match">Retry</button>
+      </div>
+    </section>
+
+    <!-- ── RESULTS ── -->
+    <section id="pane-results" class="pane">
+      <div id="results-loading" class="center-state"><div class="spinner"></div></div>
+      <div id="results-list" class="list-area" style="display:none"></div>
+      <div id="results-error" class="center-state err" style="display:none">
+        <p id="results-err-msg"></p>
+        <button data-retry="results">Retry</button>
+      </div>
+    </section>
+
+    <!-- ── SQUAD ── -->
+    <section id="pane-squad" class="pane">
+      <div id="squad-sort-bar" class="sort-bar" style="display:none">
+        <span class="sort-label">Sort by</span>
+        <button class="sort-btn active" data-sort="goals">Goals</button>
+        <button class="sort-btn" data-sort="assists">Assists</button>
+      </div>
+      <div id="squad-loading" class="center-state"><div class="spinner"></div></div>
+      <div id="squad-list" class="list-area" style="display:none"></div>
+      <div id="squad-error" class="center-state err" style="display:none">
+        <p id="squad-err-msg"></p>
+        <button data-retry="squad">Retry</button>
+      </div>
+    </section>
+
+    <!-- ── TABLE ── -->
+    <section id="pane-table" class="pane">
+      <div class="table-toggle-bar">
+        <button class="table-toggle active" data-view="standings">Standings</button>
+        <button class="table-toggle" data-view="scorers">Scorers</button>
+        <button class="table-toggle" data-view="assists">Assists</button>
+      </div>
+      <div id="table-loading" class="center-state"><div class="spinner"></div></div>
+      <div id="table-list" style="display:none"></div>
+      <div id="table-error" class="center-state err" style="display:none">
+        <p id="table-err-msg"></p>
+        <button data-retry="table">Retry</button>
+      </div>
+    </section>
+
+    <!-- ── RANKINGS ── -->
+    <section id="pane-rankings" class="pane">
+      <div class="table-toggle-bar">
+        <button class="table-toggle active" data-rview="leagues">Leagues</button>
+        <button class="table-toggle"        data-rview="clubs">Clubs</button>
+      </div>
+      <div id="rankings-loading" class="center-state"><div class="spinner"></div></div>
+      <div id="rankings-list" style="display:none"></div>
+      <div id="rankings-error" class="center-state err" style="display:none">
+        <p id="rankings-err-msg"></p>
+        <button data-retry="rankings">Retry</button>
+      </div>
+    </section>
+
+    <!-- ── NEWS (overlay, triggered by header button) ── -->
+    <section id="pane-news" class="pane">
+      <div id="news-loading" class="center-state"><div class="spinner"></div></div>
+      <div id="news-list" class="list-area" style="display:none"></div>
+      <div id="news-error" class="center-state err" style="display:none">
+        <p id="news-err-msg"></p>
+        <button data-retry="news">Retry</button>
+      </div>
+    </section>
+
+    <!-- ── TEAMS (overlay, triggered by header button) ── -->
+    <section id="pane-teams" class="pane">
+      <div class="team-search-wrap">
+        <input id="team-search" class="team-search" type="text" placeholder="Search clubs…" autocomplete="off">
+      </div>
+      <div id="teams-list" class="teams-list"></div>
+    </section>
+
+  </main>
+
+  <!-- Player hover tooltip -->
+  <div id="player-tooltip" class="player-tooltip"></div>
+
+  <script src="teams.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Football Hub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Next match countdown, results, squad stats, standings and rankings for your club.",
   "permissions": ["storage"],
   "host_permissions": [

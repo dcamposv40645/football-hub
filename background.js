@@ -43,23 +43,30 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
     switch (msg.type) {
 
       case 'GET_NEXT_MATCH': {
+        // ESPN's scoreboard endpoint rejects `dates=START-END` ranges with a 400
+        // ("Failed to get events endpoint"), so fetch a few months individually
+        // (it does accept `dates=YYYYMM`) and merge them instead.
         const now = new Date();
-        const end = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-        const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
-        const scoreboardUrl = `${base}/scoreboard?dates=${fmt(now)}-${fmt(end)}`;
-        const data = await espnGet(scoreboardUrl);
-        const next = (data.events ?? [])
+        const scoreboardUrls = Array.from({ length: 3 }, (_, i) => {
+          const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+          const ym = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`;
+          return `${base}/scoreboard?dates=${ym}`;
+        });
+        const results = await Promise.all(scoreboardUrls.map(espnGet));
+        const events = results.flatMap(r => r.events ?? []);
+        const next = events
           .filter(e => {
             const s = e.competitions?.[0]?.status?.type?.name ?? '';
             return s === 'STATUS_SCHEDULED' || s === 'STATUS_IN_PROGRESS';
           })
-          .find(e =>
+          .filter(e =>
             e.competitions?.[0]?.competitors?.some(c => String(c.team.id) === String(teamId))
-          );
+          )
+          .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
         if (!next) throw new Error('No upcoming matches found');
         // don't cache live match data so the next poll always gets fresh scores
         if (next.competitions?.[0]?.status?.type?.name === 'STATUS_IN_PROGRESS') {
-          CACHE.delete(scoreboardUrl);
+          scoreboardUrls.forEach(u => CACHE.delete(u));
         }
         return { ok: true, data: next };
       }

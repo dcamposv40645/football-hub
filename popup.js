@@ -403,10 +403,13 @@ function renderMatch(event) {
   const vsMid = document.querySelector('.vs-mid');
 
   if (isLive) {
+    // the scoreboard endpoint returns `score` as a plain string ("1"), not the
+    // { displayValue } object the schedule endpoint uses elsewhere in this file
+    const scoreText = c => (typeof c?.score === 'object' ? c.score.displayValue : c?.score) ?? '0';
     const homeComp  = competitors.find(c => c.homeAway === 'home');
     const awayComp  = competitors.find(c => c.homeAway === 'away');
-    const homeScore = homeComp?.score?.displayValue ?? '0';
-    const awayScore = awayComp?.score?.displayValue ?? '0';
+    const homeScore = scoreText(homeComp);
+    const awayScore = scoreText(awayComp);
     const clock     = comp.status?.displayClock ?? comp.status?.type?.shortDetail ?? '';
 
     vsMid.textContent = `${homeScore}–${awayScore}`;

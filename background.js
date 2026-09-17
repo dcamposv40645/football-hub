@@ -298,19 +298,28 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
         const res = await fetch(`${base}/summary?event=${eventId}`);
         if (!res.ok) throw new Error(`ESPN ${res.status}`);
         const summary = await res.json();
-        const plays = (summary.scoringPlays ?? []).map(p => {
-          const athletes = p.athletesInvolved ?? [];
-          const clock = p.clock?.displayValue ?? '';
-          return {
-            clock:     clock.includes(':') ? clock.split(':')[0] + "'" : clock,
-            teamId:    String(p.team?.id ?? ''),
-            scorer:    athletes[0]?.displayName ?? '',
-            assist:    athletes[1]?.displayName ?? null,
-            homeScore: p.homeScore ?? 0,
-            awayScore: p.awayScore ?? 0,
-            ownGoal:   /own.?goal|o\.g\./i.test(p.type?.text ?? ''),
-          };
-        });
+        // goals live in `keyEvents` (filtered by scoringPlay), not a `scoringPlays`
+        // field, and score participants are under `participants[].athlete`, not
+        // `athletesInvolved` — neither of those fields exist on this endpoint
+        const homeId = summary.header?.competitions?.[0]?.competitors
+          ?.find(c => c.homeAway === 'home')?.team?.id;
+        let homeScore = 0, awayScore = 0;
+        const plays = (summary.keyEvents ?? [])
+          .filter(e => e.scoringPlay)
+          .map(e => {
+            const participants = e.participants ?? [];
+            const clock = e.clock?.displayValue ?? '';
+            if (String(e.team?.id) === String(homeId)) homeScore++; else awayScore++;
+            return {
+              clock:     clock.includes(':') ? clock.split(':')[0] + "'" : clock,
+              teamId:    String(e.team?.id ?? ''),
+              scorer:    participants[0]?.athlete?.displayName ?? '',
+              assist:    participants[1]?.athlete?.displayName ?? null,
+              homeScore,
+              awayScore,
+              ownGoal:   /own.?goal|o\.g\./i.test(e.type?.text ?? ''),
+            };
+          });
         return { ok: true, data: { plays } };
       }
 

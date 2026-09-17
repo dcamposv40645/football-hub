@@ -56,8 +56,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
         const events = results.flatMap(r => r.events ?? []);
         const next = events
           .filter(e => {
-            const s = e.competitions?.[0]?.status?.type?.name ?? '';
-            return s === 'STATUS_SCHEDULED' || s === 'STATUS_IN_PROGRESS';
+            // 'in' covers every live sub-status (STATUS_FIRST_HALF, STATUS_HALFTIME,
+            // STATUS_SECOND_HALF, STATUS_EXTRA_TIME, ...), not just STATUS_IN_PROGRESS
+            const state = e.competitions?.[0]?.status?.type?.state ?? '';
+            return state === 'pre' || state === 'in';
           })
           .filter(e =>
             e.competitions?.[0]?.competitors?.some(c => String(c.team.id) === String(teamId))
@@ -65,7 +67,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
           .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
         if (!next) throw new Error('No upcoming matches found');
         // don't cache live match data so the next poll always gets fresh scores
-        if (next.competitions?.[0]?.status?.type?.name === 'STATUS_IN_PROGRESS') {
+        if (next.competitions?.[0]?.status?.type?.state === 'in') {
           scoreboardUrls.forEach(u => CACHE.delete(u));
         }
         return { ok: true, data: next };
@@ -74,10 +76,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
       case 'GET_RECENT_RESULTS': {
         const data    = await espnGet(`${base}/teams/${teamId}/schedule?season=${season}`);
         const results = (data.events ?? [])
-          .filter(e => {
-            const s = e.competitions?.[0]?.status?.type?.name ?? '';
-            return s === 'STATUS_FULL_TIME' || s === 'STATUS_FINAL' || s === 'STATUS_FULL_PEN';
-          })
+          .filter(e => e.competitions?.[0]?.status?.type?.state === 'post')
           .sort((a, b) => new Date(b.date) - new Date(a.date))
           .slice(0, 10);
         if (!results.length) throw new Error('No results found');
@@ -130,10 +129,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
         ]);
         const allEvents = [...(d1.events ?? []), ...(d2.events ?? [])];
 
-        const isFinished = e => {
-          const s = e.competitions?.[0]?.status?.type?.name ?? '';
-          return s === 'STATUS_FULL_TIME' || s === 'STATUS_FINAL' || s === 'STATUS_FULL_PEN';
-        };
+        const isFinished = e => e.competitions?.[0]?.status?.type?.state === 'post';
         const scoreOf = (e, id) => {
           const c = e.competitions[0].competitors.find(c => String(c.team.id) === String(id));
           return parseFloat(c?.score?.displayValue ?? 0) || 0;

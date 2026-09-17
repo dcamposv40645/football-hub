@@ -230,7 +230,7 @@ async function loadMatch(silent = false) {
       stopLivePolling();
       return;
     }
-    const isLive = res.data.competitions?.[0]?.status?.type?.name === 'STATUS_IN_PROGRESS';
+    const isLive = res.data.competitions?.[0]?.status?.type?.state === 'in';
     renderMatch(res.data);
     paneStates('match', 'card');
     if (isLive) {
@@ -382,7 +382,7 @@ function renderMatch(event) {
   const ours   = competitors.find(c => String(c.team.id) === String(currentTeam.id));
   const opp    = competitors.find(c => String(c.team.id) !== String(currentTeam.id));
   const isHome = ours?.homeAway === 'home';
-  const isLive = comp.status?.type?.name === 'STATUS_IN_PROGRESS';
+  const isLive = comp.status?.type?.state === 'in';
 
   const ourCrest = crestUrl(currentTeam.id);
   const oppCrest = crestUrl(opp?.team?.id);
